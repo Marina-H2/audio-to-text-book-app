@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio to Text Application</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: white;
+            color: black;
+            font-family: Arial, sans-serif;
+        }
+        .card {
+            background-color: #f8f9fa;
+            color: black;
+            border: none;
+        }
+        .card-header {
+            background-color: #e9ecef;
+        }
+        .btn-primary {
+            background-color: #0f3460;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #1a73e8;
+        }
+        .btn-danger {
+            background-color: #e63946;
+            border: none;
+        }
+        .btn-danger:hover {
+            background-color: #d62839;
+        }
+        textarea, input[type="file"], input[type="text"] {
+            background-color: #ffffff;
+            color: black;
+            border: 1px solid #ced4da;
+        }
+        textarea {
+            resize: none;
+        }
+        #recordingStatus {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Audio to Text Application</h1>
+
+        <!-- File Upload and Recording Section -->
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header text-center">
+                        Choose Audio File or Record Audio
+                    </div>
+                    <div class="card-body">
+                        <form action="/upload" method="POST" enctype="multipart/form-data">
+                            <!-- Audio File Upload Section -->
+                            <div class="form-group">
+                                <label for="audioFile">Upload Audio File</label>
+                                <input type="file" name="file" id="audioFile" class="form-control" accept="audio/*">
+                            </div>
+                            <p class="text-center my-2">OR</p>
+                            <!-- Audio Recording Section -->
+                            <div class="form-group text-center">
+                                <button type="button" class="btn btn-primary" id="startRecording">Start Recording</button>
+                                <button type="button" class="btn btn-danger" id="stopRecording" disabled>Stop Recording</button>
+                                <p id="recordingStatus" class="mt-2">Recording status will appear here.</p>
+                            </div>
+                            <input type="hidden" name="recordedAudio" id="recordedAudio">
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Extracted Text Section -->
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header text-center">
+                        Extracted Text
+                    </div>
+                    <div class="card-body">
+                        <textarea id="extractedText" class="form-control" rows="8" readonly>{{ extracted_text if extracted_text else 'Extracted text will appear here...' }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Editable Extracted Text Section -->
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header text-center">
+                        Edit Extracted Text
+                    </div>
+                    <div class="card-body">
+                        <textarea id="editableText" class="form-control" rows="8">{{ extracted_text if extracted_text else '' }}</textarea>
+                        <button type="button" class="btn btn-primary btn-block mt-3" id="updateTextBtn">Update Text</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Section -->
+        {% if editable %}
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header text-center">
+                        Fill the Form
+                    </div>
+                    <div class="card-body">
+                        <form action="/submit" method="POST" id="dataForm">
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input type="text" name="name" id="name" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone No</label>
+                                <input type="text" name="phone" id="phone" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" name="email" id="email" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="address">Address</label>
+                                <input type="text" name="address" id="address" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="organization">Organization</label>
+                                <input type="text" name="organization" id="organization" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="position">Position</label>
+                                <input type="text" name="position" id="position" class="form-control" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Submit Form</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- JavaScript for Recording -->
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        const startRecordingBtn = document.getElementById('startRecording');
+        const stopRecordingBtn = document.getElementById('stopRecording');
+        const recordingStatus = document.getElementById('recordingStatus');
+        const recordedAudioInput = document.getElementById('recordedAudio');
+
+        // Start recording
+        startRecordingBtn.addEventListener('click', () => {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+                    recordingStatus.textContent = "Recording in progress...";
+                    stopRecordingBtn.disabled = false;
+                    startRecordingBtn.disabled = true;
+
+                    mediaRecorder.ondataavailable = event => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const reader = new FileReader();
+                        reader.readAsDataURL(audioBlob);
+                        reader.onloadend = () => {
+                            recordedAudioInput.value = reader.result; // Base64 encoded audio
+                        };
+                        recordingStatus.textContent = "Recording stopped. Ready for upload.";
+                        audioChunks = [];
+                    };
+                })
+                .catch(error => {
+                    console.error('Error accessing microphone:', error);
+                    recordingStatus.textContent = "Error accessing microphone.";
+                    stopRecordingBtn.disabled = true;
+                    startRecordingBtn.disabled = false;
+                });
+        });
+
+        // Stop recording
+        stopRecordingBtn.addEventListener('click', () => {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                stopRecordingBtn.disabled = true;
+                startRecordingBtn.disabled = false;
+            }
+        });
+
+        // Update Extracted Text and Auto-fill Form
+        document.getElementById('updateTextBtn').addEventListener('click', () => {
+            const updatedText = document.getElementById('editableText').value;
+
+            // Send updated text to the backend
+            fetch('/update_text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ updatedText: updatedText }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Auto-fill the form fields with the received data
+                    document.getElementById('name').value = data.name || '';
+                    document.getElementById('phone').value = data.phone || '';
+                    document.getElementById('email').value = data.email || '';
+                    document.getElementById('address').value = data.address || '';
+                    document.getElementById('organization').value = data.organization || '';
+                    document.getElementById('position').value = data.position || '';
+                })
+                .catch(error => console.error('Error updating text:', error));
+        });
+    </script>
+</body>
+</html>

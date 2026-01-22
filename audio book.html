@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" types="logo" href="1.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio to Text - Book Creator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #3f705b;
+            color: #333;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+        }
+
+            header {
+                           background: radial-gradient(circle, rgba(0, 0, 0, 0.5) 10%, #023c2c 60%, #378a73 100%);
+
+
+                 color: #fff;
+                  padding: 20px;
+                 text-align: center;
+                  }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        .left-section {
+            background: none;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .right-section {
+            position: relative;
+            background: none;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+       .right-section video {
+          position: absolute;
+          top: 0;
+          left: 0%;
+          width: 100%;
+          height: 100%;
+          object-fit: fill; /* Ensures the video covers the entire container */
+          z-index: -1; /* Ensures the video is behind the content */
+          opacity: 0.6; /* Optional: Adjust transparency for better readability */
+}
+        .form-group {
+            margin-bottom: 15px;
+            background:none;
+            
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input[type="file"], input[type="text"], textarea {
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #502855;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #3700b3;
+        }
+        .output {
+            padding: 10px;
+            background-color: none;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            
+        }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background: radial-gradient(circle, #023c2c 50%, #378a73 100%);
+            color: white;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            right: 20px;
+            top: 50px;
+            background: white;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 1000;
+        }
+        .popup.active {
+            display: block;
+        }
+        .cover-button {
+            position: fixed;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            z-index: 1000;
+        }
+        .cover-button img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .cover-button img:hover {
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        .animated-box {
+            width: 30px;
+            height: 30px;
+            background-color: #6200ea;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+            margin: auto;
+            margin-bottom: 10px;
+        }
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+        .horizontal-options {
+            display: flex;
+            align-items:center ;
+            gap: 1px;
+        }
+        .horizontal-options input {
+            margin-left: 10px;
+            margin-right: 10px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            background: powderblue;
+            opacity:0.8;
+            color:#000000;
+        }
+/* Popup Container */
+.popup {
+    display: none;
+    position: fixed;
+    right: 20px;
+    top: 20%;
+    background: white;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 8px;
+    z-index: 1000;
+    width: 300px;
+    text-align: center;
+}
+
+/* Active Popup */
+.popup.active {
+    display: block;
+}
+
+/* Book Covers in Popup */
+.cover-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.cover-list img {
+    width: 80px;
+    height: 120px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    justify-content: center;
+}
+
+.cover-list img:hover {
+    border: 2px solid #6200ea;
+}
+#loginButton {
+    background-color: #1888e1;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;#1888e1
+}
+
+#loginButton:hover {
+    background-color: #3322c1;
+}
+
+
+
+
+
+ 
+      
+
+           /* Chatbot Styles */
+        .chatbot-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle,#378a73   30%, #023c2c 100%);
+            color: #fff;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .chatbot-window {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 300px;
+            max-height: 400px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .chatbot-header {
+            background: radial-gradient(circle,#378a73   50%, #023c2c 100%);
+            color: #fff;
+            padding: 10px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            text-align: center;
+        }
+
+        .chatbot-body {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .chatbot-footer {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+        }
+
+        .chatbot-footer input {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .chatbot-footer button {
+            background: radial-gradient(circle,#023c2c 30%, #378a73 100%);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 10px;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+
+        .chatbot-footer button:hover {
+            background: radial-gradient(circle,#378a73   50%, #023c2c 100%);
+        }
+
+        .chatbot-message {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .chatbot-message.user {
+            background-color: #f1f1f1;
+            align-self: flex-start;
+        }
+
+        .chatbot-message.bot {
+            background-color: #e1bee7;
+            align-self: flex-end;
+        }
+  
+
+
+
+
+
+
+    textarea {
+      width: 100%;
+      height: 100px;
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      resize: vertical;
+    }
+
+    select, input[type="color"] {
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+
+    .book-preview {
+      padding: 15px;
+      background: #eee;
+      border-radius: 5px;
+      min-height: 200px;
+    }
+    
+
+div.scroll-container {
+  background-color: #333;
+  overflow: auto;
+  white-space: nowrap;
+  padding: 10px;
+
+    </style>
+</head>
+<body>
+    <header>
+       
+        <h1>Audio to Text - Create Your Book</h1>
+        <p>Convert your audio files into books and customize with ease.</p>
+   <!-- Login Button -->
+        <div>
+            <button id="loginButton" onclick="handleLogin()">Login</button>
+        </div>
+    </div>
+                
+            </div>
+        </div>
+
+     
+</header>
+
+
+
+
+
+
+    <!-- Existing Content -->
+
+    <!-- Chatbot -->
+    <button class="chatbot-button" id="chatbotToggle">💬</button>
+    <div class="chatbot-window" id="chatbotWindow">
+        <div class="chatbot-header">
+            Chat with us!
+        </div>
+        <div class="chatbot-body" id="chatbotBody">
+            <!-- Chat messages will appear here -->
+        </div>
+        <div class="chatbot-footer">
+            <input type="text" id="chatbotInput" placeholder="Type your message...">
+            <button id="chatbotSend">Send</button>
+        </div>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        </div>
+     
+    </div>
+    </header>
+    <div class="container">
+        <div class="left-section">
+            <h2>User Actions</h2>
+            <p>Upload audio files, edit text, and add to your book effortlessly.</p>
+            <div class="form-group">
+                <label for="bookTitle">Choose a Title for Your Book:</label>
+                <input type="text" id="bookTitle" placeholder="Enter book title...">
+            </div>
+            <div class="form-group">
+                <label for="audioFile">Upload Audio File:</label>
+                <input type="file" id="audioFile" name="audioFile" accept="audio/*">
+            </div>
+            <button style="background-color:#58dd36;" onclick="startRecording()">Start Recording</button>
+            <button style="background-color:#e13030;" onclick="stopRecording()">Stop Recording</button>
+            <div class="form-group">
+                <button type="submit" style="margin: 10px;margin-left:30s%;">Submit</button>
+            </div>
+            <div class="output" id="textOutput">
+                <h3>Extracted Text:</h3>
+                <textarea id="textContent" rows="5">Your extracted text will appear here.</textarea>
+            </div>
+            <div class="output">
+                <h3>Edit Text:</h3>
+                <textarea id="editContent" rows="5">Edit your text here.</textarea>
+            </div>
+            <div class="form-group">
+                <button onclick="updateText()">Submit Edited Text</button>
+            </div>
+            <div class="form-group">
+                <button onclick="addTextToBook()">Add to Book</button>
+            </div>
+        </div>
+
+        <div class="right-section">
+        <video autoplay muted loop>
+        <source src="bv.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+           
+            <h2>Book Editor</h2>
+<div class="form-group">
+        <label for="customCover">Upload Your Book Cover:</label>
+        <input type="file" id="customCover" accept="image/*" onchange="previewCustomCover()">
+
+
+     <!-- Book Covers Popup Button -->
+    <div class="cover-button" onclick="toggleCoverPopup()" style=";background: radial-gradient(circle,#378a73   50%, #023c2c 100%);padding-left:14px;border-radius: 10px;justify-content: center;">
+        <img src="c.jpeg" alt="Choose Cover" style="border-radius: 4px;width: 70px;height: 90px;"><h5 style="color:white;">Choose Cover</h5>
+    </div>
+
+
+    <!-- Popup for Book Covers -->
+
+    <div class="popup" id="coverPopup"style="background: radial-gradient(circle,#023c2c 0%, #3f705b 100%);">
+ 
+        <h3>Select a Book Cover</h3>
+      
+ <div class="cover-list" style="overflow-y: scroll;height:100px;width:300px;">
+
+            <img src="o.jpg" alt="Cover 1" class="book-cover" onclick="selectCover('o.jpg')">
+            <img src="v.jpg" alt="Cover 2" class="book-cover" onclick="selectCover('v.jpg')">
+            <img src="o1.jpg" alt="Cover 3" class="book-cover" onclick="selectCover('o1.jpg')">
+            <img src="r.jpeg" alt="Cover 4" class="book-cover" onclick="selectCover('r.jpeg')">
+            <img src="o.jpg" alt="Cover 1" class="book-cover" onclick="selectCover('o.jpg')">
+            <img src="v.jpg" alt="Cover 2" class="book-cover" onclick="selectCover('v.jpg')">
+            <img src="o.jpg" alt="Cover 1" class="book-cover" onclick="selectCover('o.jpg')">
+            <img src="v.jpg" alt="Cover 2" class="book-cover" onclick="selectCover('v.jpg')">
+            <img src="o1.jpg" alt="Cover 3" class="book-cover" onclick="selectCover('o1.jpg')">
+            <img src="r.jpeg" alt="Cover 4" class="book-cover" onclick="selectCover('r.jpeg')">
+            <img src="o.jpg" alt="Cover 1" class="book-cover" onclick="selectCover('o.jpg')">
+            <img src="v.jpg" alt="Cover 2" class="book-cover" onclick="selectCover('v.jpg')">
+</div>
+
+        
+        <button onclick="toggleCoverPopup()" style="margin-top:20px;background: radial-gradient(circle,#378a73   50%, #023c2c 100%)">Close</button>
+    </div>
+
+    <div class="right-section">
+<div class="output">
+
+                <h3>Book Preview</h3>
+                <div id="bookPages" style="border: 2px solid blue; min-height: 200px; padding: 10px;">
+                    <p>Book pages will appear here.</p>
+                </div>
+      </div>
+         
+
+
+      <label for="language">Language</label>
+      <select id="language" style="padding-left:10px;">
+        <option value="en">English</option>
+        <option value="es">Spanish</option>
+        <option value="fr">French</option>
+        <option value="en" selected>English</option>
+        <option value="ur" selected>Urdu</option>
+        <option value="pa" selected>pashto</option>
+        <option value="es">Español (Spanish)</option>
+        <option value="fr">Français (French)</option>
+        <option value="de">Deutsch (German)</option>
+        <option value="zh">中文 (Chinese)</option>
+        <option value="hi">हिन्दी (Hindi)</option>
+        <option value="ar">العربية (Arabic)</option>
+        <option value="pt">Português (Portuguese)</option>
+        <option value="ru">Русский (Russian)</option>
+        <option value="ja">日本語 (Japanese)</option>
+        <option value="ko">한국어 (Korean)</option>
+        <option value="it">Italiano (Italian)</option>
+      </select>
+
+      <label for="font">Font</label>
+      <select id="font">
+        <option value="Arial">Arial</option>
+        <option value="Times New Roman">Times New Roman</option>
+        <option value="Courier New">Courier New</option>
+      </select>
+
+      <label for="bg-color">Background Color</label>
+      <input type="color" id="bg-color" value="#ffffff">
+
+      <label for="font-color">Font Color</label>
+      <input type="color" id="font-color" value="#000000">
+
+            <div>
+                <button onclick="viewBook()">View Book</button>
+              
+             <button onclick="downloadBook()">Download Book</button>
+            </div>
+    </div>
+  </div>
+
+
+            <div class="animated-box"></div>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2025 Audio to Text Converter. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function startRecording() {
+            alert('Recording started!');
+        }
+
+        function stopRecording() {
+            alert('Recording stopped!');
+        }
+
+        function updateText() {
+            alert('Text updated!');
+        }
+
+        function addTextToBook() {
+            alert('Text added to book!');
+        }
+
+        function viewBook() {
+            alert('Displaying book preview...');
+        }
+
+        function downloadBook() {
+            alert('Book downloaded!');
+        }
+        document.getElementById('font').addEventListener('change', function() {
+    const selectedFont = this.value;
+    const bookPages = document.getElementById('bookPages');
+    bookPages.style.fontFamily = selectedFont;
+        });
+ function toggleCoverPopup() {
+    const popup = document.getElementById('coverPopup');
+    popup.classList.toggle('active');
+}
+
+function selectCover(coverUrl) {
+    const bookPages = document.getElementById('bookPages');
+    bookPages.style.backgroundImage = `url(${coverUrl})`;
+    bookPages.style.backgroundSize = 'cover';
+    bookPages.style.backgroundPosition = 'center';
+    toggleCoverPopup();
+}
+function toggleCoverPopup() {
+    const popup = document.getElementById('coverPopup');
+    popup.classList.toggle('active');
+}
+
+function selectCover(coverUrl) {
+    const bookPages = document.getElementById('bookPages');
+    bookPages.style.backgroundImage = `url(${coverUrl})`;
+    bookPages.style.backgroundSize = 'cover';
+    bookPages.style.backgroundPosition = 'center';
+    toggleCoverPopup();
+}
+
+
+function previewCustomCover() {
+    const fileInput = document.getElementById('customCover');
+    const file = fileInput.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            const bookPages = document.getElementById('bookPages');
+            bookPages.style.backgroundImage = `url(${event.target.result})`;
+            bookPages.style.backgroundSize = 'cover';
+            bookPages.style.backgroundPosition = 'center';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+function handleLogin() {
+    alert("Redirecting to login page...");
+    // Example: Replace with actual login page link
+    window.location.href = "login.html";
+}
+
+
+
+
+    // Select DOM elements
+        const chatbotToggle = document.getElementById('chatbotToggle');
+        const chatbotWindow = document.getElementById('chatbotWindow');
+        const chatbotBody = document.getElementById('chatbotBody');
+        const chatbotInput = document.getElementById('chatbotInput');
+        const chatbotSend = document.getElementById('chatbotSend');
+
+        // Toggle Chatbot Window
+        chatbotToggle.addEventListener('click', () => {
+            chatbotWindow.style.display = chatbotWindow.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        // Send Message
+        chatbotSend.addEventListener('click', () => {
+            sendMessage();
+        });
+
+        // Handle "Enter" key
+        chatbotInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Add Message
+        function addMessage(text, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `chatbot-message ${sender}`;
+            messageElement.textContent = text;
+            chatbotBody.appendChild(messageElement);
+            chatbotBody.scrollTop = chatbotBody.scrollHeight; // Scroll to bottom
+        }
+
+        // Bot Responses
+        function getBotResponse(message) {
+            const responses = {
+                hello: 'Hi there! How can I assist you today?',
+                help: 'Sure! What do you need help with?',
+                book: 'You can create your book by uploading audio and editing the text.',
+                default: 'I’m sorry, I didn’t understand that. Could you rephrase?',
+            };
+
+            const response = responses[message.toLowerCase()] || responses.default;
+            setTimeout(() => addMessage(response, 'bot'), 500); // Simulate response delay
+        }
+
+        // Send Message
+        function sendMessage() {
+            const message = chatbotInput.value.trim();
+            if (message) {
+                addMessage(message, 'user');
+                getBotResponse(message);
+                chatbotInput.value = '';
+            }
+        }
+document.getElementById('languageSelect').addEventListener('change', function () {
+    const selectedLanguage = this.value;
+    const textOutput = document.getElementById('textOutput');
+    const editContent = document.getElementById('editContent');
+
+    // Example: Update placeholders and labels dynamically based on selected language
+    const translations = {
+        en: {
+            placeholder: 'Your extracted text will appear here.',
+            editPlaceholder: 'Edit your text here.',
+        },
+        es: {
+            placeholder: 'Tu texto extraído aparecerá aquí.',
+            editPlaceholder: 'Edita tu texto aquí.',
+        },
+        fr: {
+            placeholder: 'Votre texte extrait apparaîtra ici.',
+            editPlaceholder: 'Modifiez votre texte ici.',
+        },
+        // Add more translations here
+    };
+
+    const translation = translations[selectedLanguage] || translations['en'];
+    document.getElementById('textContent').placeholder = translation.placeholder;
+    document.getElementById('editContent').placeholder = translation.editPlaceholder;
+
+    alert(`Language changed to: ${selectedLanguage}`);
+});
+
+     // Select elements
+        const previewButton = document.getElementById('previewButton');
+        const downloadButton = document.getElementById('downloadButton');
+        const textArea = document.getElementById('textArea');
+        const previewSection = document.getElementById('preview-section');
+        const bookPreview = document.getElementById('bookPreview');
+
+        // Event listener for Preview button
+        previewButton.addEventListener('click', () => {
+            const content = textArea.value.trim();
+            if (content === '') {
+                alert('Please enter or upload text to preview.');
+                return;
+            }
+
+            bookPreview.textContent = content;
+            previewSection.style.display = 'block';
+        });
+
+        // Event listener for Download button
+        downloadButton.addEventListener('click', () => {
+            const content = textArea.value.trim();
+            if (content === '') {
+                alert('Please enter or upload text to download.');
+                return;
+            }
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'book.txt';
+            link.click();
+        });
+
+
+    </script>
+</body>
+</html>

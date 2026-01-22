@@ -1,0 +1,64 @@
+/* Custom Styling for the Audio to Text App */
+
+body {
+    background-color: #f8f9fa;
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: #2c3e50;
+}
+
+.card {
+    margin-bottom: 30px;
+}
+
+.card-header {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+textarea {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    resize: none;
+}
+
+textarea:focus, input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+button {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+input[type="file"] {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+input[type="file"]:focus {
+    border-color: #007bff;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+/* Media Queries for responsiveness */
+@media (max-width: 768px) {
+    .col-md-6 {
+        margin-bottom: 20px;
+    }
+}
+
